@@ -1,11 +1,14 @@
 package main
 
 import (
+	"log"
+	"os"
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
 	"fmt"
+	"path/filepath"
 	
 )
 
@@ -21,12 +24,18 @@ func NewGoSdkWithAmazonQDemoStack(scope constructs.Construct, id string, props *
 	stack := awscdk.NewStack(scope, &id, &sprops)
 
 	// The code that defines your stack goes here
+	path, err := os.Getwd()
+	if err != nil {
+		log.Println(err)
+	}
+	lambdaPath := filepath.Join(path, "myFunction.zip")
 
 	// Create the Lambda function
 	 lambdaFunction := awslambda.NewFunction(stack, jsii.String("MyLambdaFunction"), &awslambda.FunctionProps{
-        Code:         awslambda.AssetCode_FromAsset(jsii.String("lambdafunction"), nil),
+        Code:         awslambda.AssetCode_FromAsset(&lambdaPath, nil),
         Handler:      jsii.String("main"),
-        Runtime:      awslambda.Runtime_PROVIDED_AL2(),
+        Runtime:      awslambda.Runtime_PROVIDED_AL2023(),
+		Architecture: awslambda.Architecture_ARM_64(),
     })
 
 	fmt.Println("Lambda function ARN:", *lambdaFunction.FunctionArn()) 
