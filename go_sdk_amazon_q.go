@@ -1,15 +1,15 @@
 package main
 
 import (
-	"log"
-	"os"
+	"fmt"
 	"github.com/aws/aws-cdk-go/awscdk/v2"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awsapigateway"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
-	"fmt"
+	"log"
+	"os"
 	"path/filepath"
-	
 )
 
 type GoSdkAmazonQStackProps struct {
@@ -31,14 +31,19 @@ func NewGoSdkWithAmazonQDemoStack(scope constructs.Construct, id string, props *
 	lambdaPath := filepath.Join(path, "myFunction.zip")
 
 	// Create the Lambda function
-	 lambdaFunction := awslambda.NewFunction(stack, jsii.String("MyLambdaFunction"), &awslambda.FunctionProps{
-        Code:         awslambda.AssetCode_FromAsset(&lambdaPath, nil),
-        Handler:      jsii.String("main"),
-        Runtime:      awslambda.Runtime_PROVIDED_AL2023(),
+	lambdaFunction := awslambda.NewFunction(stack, jsii.String("MyLambdaFunction"), &awslambda.FunctionProps{
+		Code:         awslambda.AssetCode_FromAsset(&lambdaPath, nil),
+		Handler:      jsii.String("main"),
+		Runtime:      awslambda.Runtime_PROVIDED_AL2023(),
 		Architecture: awslambda.Architecture_ARM_64(),
-    })
+	})
 
-	fmt.Println("Lambda function ARN:", *lambdaFunction.FunctionArn()) 
+	fmt.Println("Lambda function ARN:", *lambdaFunction.FunctionArn())
+
+	// Create the API Gateway
+	awsapigateway.NewLambdaRestApi(stack, jsii.String("Endpoint"), &awsapigateway.LambdaRestApiProps{
+		Handler: lambdaFunction,
+	})
 
 	return stack
 }

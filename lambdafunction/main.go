@@ -2,27 +2,32 @@
 package main
 
 import (
-	"context"
 	"fmt"
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
+func HandleRequest(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	// Print the incoming request
+	fmt.Printf("Received request: %v\n", request)
 
-type MyEvent struct {
-	Name string `json:"What is your name?"`
-	Age  int    `json:"How old are you?"`
-}
+	ApiResponse := events.APIGatewayProxyResponse{}
+	// Switch for identifying the HTTP request
+	switch request.HTTPMethod {
+	case "GET":
+		// Obtain the QueryStringParameter
+		instanceId := request.QueryStringParameters["instanceId"]
+		region := request.QueryStringParameters["region"]
 
-type MyResponse struct {
-	Message string `json:"Answer"`
-}
-
-func HandleRequest(ctx context.Context, event *MyEvent) (*MyResponse, error) {
-	if event == nil {
-		return nil, fmt.Errorf("received nil event")
+		// Check if the name parameter is present
+		if instanceId != "" {
+			ApiResponse = events.APIGatewayProxyResponse{Body: "instanceId=" + instanceId + " Region= " + region, StatusCode: 200}
+		} else {
+			ApiResponse = events.APIGatewayProxyResponse{Body: "Error: Query Parameter name missing", StatusCode: 500}
+		}
 	}
-
-	return &MyResponse{Message: fmt.Sprintf("%s is %d years old!", event.Name, event.Age)}, nil
+	// Response
+	return ApiResponse, nil
 
 }
 
