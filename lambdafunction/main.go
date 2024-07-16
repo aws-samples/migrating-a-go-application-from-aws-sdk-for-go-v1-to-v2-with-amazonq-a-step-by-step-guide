@@ -5,11 +5,15 @@ import (
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"os"
 )
 
 func HandleRequest(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	// Print the incoming request
 	fmt.Printf("Received request: %v\n", request)
+
+	bucketName := os.Getenv("BUCKET_NAME")
+	fmt.Printf("Bucket name: %s\n", bucketName)
 
 	ApiResponse := events.APIGatewayProxyResponse{}
 	// Switch for identifying the HTTP request

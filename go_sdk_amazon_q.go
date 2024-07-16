@@ -5,11 +5,13 @@ import (
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsapigateway"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awss3"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
 	"log"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 type GoSdkAmazonQStackProps struct {
@@ -43,6 +45,32 @@ func NewGoSdkWithAmazonQDemoStack(scope constructs.Construct, id string, props *
 	// Create the API Gateway
 	awsapigateway.NewLambdaRestApi(stack, jsii.String("Endpoint"), &awsapigateway.LambdaRestApiProps{
 		Handler: lambdaFunction,
+	})
+
+	// create a s3 bucket
+	// Get the current date
+	now := time.Now()
+
+	// Format the date as a string in the desired format
+	bucketName := fmt.Sprintf("my-bucket-%d%02d%02d", now.Year(), now.Month(), now.Day())
+
+	// Print the bucket name
+	fmt.Println("Bucket Name:", bucketName)
+
+	// Create an S3 bucket
+	bucket := awss3.NewBucket(stack, jsii.String("jrtestaccessbucket"), &awss3.BucketProps{
+		BucketName:    jsii.String(bucketName), // Convert bucketName to *string
+		RemovalPolicy: awscdk.RemovalPolicy_DESTROY,
+	})
+
+	// Set a bucket name environment variable in lambda function and add permissions to lambda to read from S3 bucket
+	lambdaFunction.AddEnvironment(jsii.String("BUCKET_NAME"), bucket.BucketName(), nil)
+
+	bucket.GrantRead(lambdaFunction, nil)
+
+	// Output the bucket name
+	awscdk.NewCfnOutput(stack, jsii.String("BucketName"), &awscdk.CfnOutputProps{
+		Value: bucket.BucketName(),
 	})
 
 	return stack
