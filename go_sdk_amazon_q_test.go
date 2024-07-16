@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/assertions"
+	// "github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
 	"github.com/aws/jsii-runtime-go"
 )
 
@@ -20,7 +21,18 @@ func TestGoSdkAmazonQStack(t *testing.T) {
 	// THEN
 	template := assertions.Template_FromStack(stack, nil)
 
-	template.HasResourceProperties(jsii.String("AWS::SQS::Queue"), map[string]interface{}{
-		"VisibilityTimeout": 300,
+	template.HasResourceProperties(jsii.String("AWS::Lambda::Function"), map[string]any{
+		"Runtime": "provided.al2023",
 	})
+
+	// Check for api gw
+	template.HasResourceProperties(jsii.String("AWS::ApiGateway::RestApi"), map[string]any{
+		"Name": "Endpoint",
+	})
+
+	// check for S3 bucket
+	template.HasResourceProperties(jsii.String("AWS::S3::Bucket"), map[string]any{
+		"BucketName": "my-bucket-20240716",
+	})
+
 }
