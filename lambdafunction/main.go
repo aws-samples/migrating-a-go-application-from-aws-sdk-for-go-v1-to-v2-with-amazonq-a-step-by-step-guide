@@ -1,4 +1,3 @@
-// lambda-function/main.go
 package main
 
 import (
