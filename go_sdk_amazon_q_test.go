@@ -1,10 +1,11 @@
 package main
 
 import (
-	"testing"
-
+	"fmt"
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/assertions"
+	"testing"
+	"time"
 	// "github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
 	"github.com/aws/jsii-runtime-go"
 )
@@ -31,8 +32,13 @@ func TestGoSdkAmazonQStack(t *testing.T) {
 	})
 
 	// check for S3 bucket
+	now := time.Now()
+
+	// Format the date as a string in the desired format
+	bucketName := fmt.Sprintf("my-bucket-%d%02d%02d", now.Year(), now.Month(), now.Day())
+
 	template.HasResourceProperties(jsii.String("AWS::S3::Bucket"), map[string]any{
-		"BucketName": "my-bucket-20240716",
+		"BucketName": bucketName,
 	})
 
 }
