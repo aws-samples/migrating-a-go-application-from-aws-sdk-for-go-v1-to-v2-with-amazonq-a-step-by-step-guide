@@ -11,7 +11,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"time"
+	"go_sdk_amazon_q/lib"
 )
 
 type GoSdkAmazonQStackProps struct {
@@ -40,7 +40,9 @@ func NewGoSdkWithAmazonQDemoStack(scope constructs.Construct, id string, props *
 		Architecture: awslambda.Architecture_ARM_64(),
 	})
 
-	fmt.Println("Lambda function ARN:", *lambdaFunction.FunctionArn())
+	if lambdaFunction.FunctionArn() != nil{
+		fmt.Println("Lambda function ARN:", *lambdaFunction.FunctionArn())
+	}
 
 	// Create the API Gateway
 	awsapigateway.NewLambdaRestApi(stack, jsii.String("Endpoint"), &awsapigateway.LambdaRestApiProps{
@@ -48,11 +50,8 @@ func NewGoSdkWithAmazonQDemoStack(scope constructs.Construct, id string, props *
 	})
 
 	// create a s3 bucket
-	// Get the current date
-	now := time.Now()
-
 	// Format the date as a string in the desired format
-	bucketName := fmt.Sprintf("my-bucket-%d%02d%02d", now.Year(), now.Month(), now.Day())
+	bucketName := fmt.Sprintf("my-bucket-20240716")
 
 	// Print the bucket name
 	fmt.Println("Bucket Name:", bucketName)
@@ -86,6 +85,12 @@ func main() {
 			Env: env(),
 		},
 	})
+
+	lib.NewDynamoDBStack(app, "DynamoDBStack", &lib.DynamoDBStackProps{
+        awscdk.StackProps{
+            Env: env(),
+        },
+    })
 
 	app.Synth(nil)
 }
