@@ -40,10 +40,6 @@ func NewGoSdkWithAmazonQDemoStack(scope constructs.Construct, id string, props *
 		Architecture: awslambda.Architecture_ARM_64(),
 	})
 
-	if lambdaFunction.FunctionArn() != nil{
-		fmt.Println("Lambda function ARN:", *lambdaFunction.FunctionArn())
-	}
-
 	// Create the API Gateway
 	awsapigateway.NewLambdaRestApi(stack, jsii.String("Endpoint"), &awsapigateway.LambdaRestApiProps{
 		Handler: lambdaFunction,
