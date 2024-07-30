@@ -14,6 +14,7 @@ import (
 )
 
 type Player struct {
+	PlayerID           string
 	LastName           string
 	FirstName          string
 	DOB                string
@@ -22,12 +23,20 @@ type Player struct {
 	CountryOfResidence string
 }
 
+type playerWithHits struct {
+	Player Player
+	Hits   int
+}
+
 func HandleRequest(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	// Print the incoming request
 	fmt.Printf("Received request: %v\n", request)
 
 	bucketName := os.Getenv("BUCKET_NAME")
 	fmt.Printf("Bucket name: %s\n", bucketName)
+
+	hitsLambda := os.Getenv("HITS_LAMBDA")
+	fmt.Printf("Hits Lambda: %s\n", hitsLambda)
 
 	ApiResponse := events.APIGatewayProxyResponse{}
 	// Switch for identifying the HTTP request
@@ -72,21 +81,31 @@ func HandleRequest(request events.APIGatewayProxyRequest) (events.APIGatewayProx
 		// filter for first name or last name and return the data
 
 		if len(fields) >= 6 { // Ensure we have at least six fields
-			lastName := fields[0]
-			firstName := fields[1]
+			lastName := fields[1]
+			firstName := fields[2]
 
 			// Filter for specific first name or last name
 			if strings.EqualFold(firstName, request.QueryStringParameters["firstName"]) || strings.EqualFold(lastName, request.QueryStringParameters["lastName"]) {
-				fmt.Println(line)
+				fmt.Println("Found a match for the player %v", line)
+				player := Player{
+					PlayerID:           fields[0],
+					LastName:           fields[1],
+					FirstName:          fields[2],
+					DOB:                fields[3],
+					Plays:              fields[4],
+					CountryOfBirth:     fields[5],
+					CountryOfResidence: fields[6],
+				}
 				// return this line as a response
-				filteredPlayers = append(filteredPlayers, Player{
-					LastName:           fields[0],
-					FirstName:          fields[1],
-					DOB:                fields[2],
-					Plays:              fields[3],
-					CountryOfBirth:     fields[4],
-					CountryOfResidence: fields[5],
-				})
+				filteredPlayers = append(filteredPlayers, player)
+				fmt.Println("Calling hitslambda %v", line)
+				// update struct with hits
+				playerWithHits := playerWithHits{
+					Player: player,
+					Hits:   1,
+				}
+				fmt.Println("Player with hits %v", playerWithHits)
+
 			}
 		}
 

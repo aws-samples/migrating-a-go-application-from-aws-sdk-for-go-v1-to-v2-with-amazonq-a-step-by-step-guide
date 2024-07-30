@@ -7,7 +7,7 @@ import (
     "github.com/aws/constructs-go/constructs/v10"
     "github.com/aws/jsii-runtime-go"
 	"log"
-	"os"
+	"os" 
 	"path/filepath"
 )
 
@@ -15,7 +15,7 @@ type DynamoDBStackProps struct {
 	awscdk.StackProps
 }
 
-func NewDynamoDBStack(scope constructs.Construct, id string, props *DynamoDBStackProps) awscdk.Stack {
+func NewDynamoDBStack(scope constructs.Construct, id string, props *DynamoDBStackProps) (awscdk.Stack, awslambda.Function) {
     var sprops awscdk.StackProps
     if props != nil {
         sprops = props.StackProps
@@ -30,16 +30,16 @@ func NewDynamoDBStack(scope constructs.Construct, id string, props *DynamoDBStac
 	lambdaPath := filepath.Join(path, "hitsLambda.zip")
 
     // Create a new DynamoDB table
-    dynamodb := awsdynamodb.NewTable(stack, jsii.String("PlayerHits"), &awsdynamodb.TableProps{
+    table := awsdynamodb.NewTable(stack, jsii.String("PlayerHits"), &awsdynamodb.TableProps{
         PartitionKey: &awsdynamodb.Attribute{
-            Name: jsii.String("id"),
+            Name: jsii.String("player_id"),
             Type: awsdynamodb.AttributeType_STRING,
         },
         RemovalPolicy: awscdk.RemovalPolicy_DESTROY,
     })
 
     // Create a new Lambda function to store hits by a player
-	lambdaFunction := awslambda.NewFunction(stack, jsii.String("PlayerHits"), &awslambda.FunctionProps{
+	hitsLambda := awslambda.NewFunction(stack, jsii.String("PlayerHitsFunction"), &awslambda.FunctionProps{
 		Code:         awslambda.AssetCode_FromAsset(&lambdaPath, nil),
 		Handler:      jsii.String("main"),
 		Runtime:      awslambda.Runtime_PROVIDED_AL2023(),
@@ -47,10 +47,10 @@ func NewDynamoDBStack(scope constructs.Construct, id string, props *DynamoDBStac
 	})
 
     //Set dynamoDB table as an environment variable for the lambda function
-    lambdaFunction.AddEnvironment(jsii.String("DYNAMODB_TABLE_NAME"), dynamodb.TableName(), nil);
+    hitsLambda.AddEnvironment(jsii.String("DYNAMODB_TABLE_NAME"), table.TableName(), nil);
 	
     // Add read write privileges for the lambda function
-    dynamodb.GrantReadWriteData(lambdaFunction);
+    table.GrantReadWriteData(hitsLambda);
 
-    return stack
+    return stack, hitsLambda
 }

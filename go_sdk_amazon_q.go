@@ -8,14 +8,15 @@ import (
 	"github.com/aws/aws-cdk-go/awscdk/v2/awss3"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
+	"go_sdk_amazon_q/lib"
 	"log"
 	"os"
 	"path/filepath"
-	"go_sdk_amazon_q/lib"
 )
 
 type GoSdkAmazonQStackProps struct {
 	awscdk.StackProps
+	HitsLambda awslambda.Function
 }
 
 func NewGoSdkWithAmazonQDemoStack(scope constructs.Construct, id string, props *GoSdkAmazonQStackProps) awscdk.Stack {
@@ -24,6 +25,8 @@ func NewGoSdkWithAmazonQDemoStack(scope constructs.Construct, id string, props *
 		sprops = props.StackProps
 	}
 	stack := awscdk.NewStack(scope, &id, &sprops)
+
+	hitsLambda := props.HitsLambda
 
 	// The code that defines your stack goes here
 	path, err := os.Getwd()
@@ -60,6 +63,7 @@ func NewGoSdkWithAmazonQDemoStack(scope constructs.Construct, id string, props *
 
 	// Set a bucket name environment variable in lambda function and add permissions to lambda to read from S3 bucket
 	lambdaFunction.AddEnvironment(jsii.String("BUCKET_NAME"), bucket.BucketName(), nil)
+	lambdaFunction.AddEnvironment(jsii.String("HITS_LAMBDA"), hitsLambda.FunctionName(), nil)
 
 	bucket.GrantRead(lambdaFunction, nil)
 
@@ -76,17 +80,18 @@ func main() {
 
 	app := awscdk.NewApp(nil)
 
-	NewGoSdkWithAmazonQDemoStack(app, "GoSdkAmazonQStack", &GoSdkAmazonQStackProps{
+	_, hitsLambda := lib.NewDynamoDBStack(app, "DynamoDBStack", &lib.DynamoDBStackProps{
 		awscdk.StackProps{
 			Env: env(),
 		},
 	})
 
-	lib.NewDynamoDBStack(app, "DynamoDBStack", &lib.DynamoDBStackProps{
-        awscdk.StackProps{
-            Env: env(),
-        },
-    })
+	NewGoSdkWithAmazonQDemoStack(app, "GoSdkAmazonQStack", &GoSdkAmazonQStackProps{
+		awscdk.StackProps{
+			Env: env(),
+		},
+		hitsLambda,
+	})
 
 	app.Synth(nil)
 }
