@@ -1,11 +1,11 @@
-LastName,FirstName,DOB,Plays,CountryOfBirth,CountryOfResidence
-Smith,John,1990-05-15,Right,United States,United States
-Garcia,Maria,1985-11-22,Right,Mexico,Canada
-Lee,David,1978-03-01,Left,South Korea,United States
-Patel,Anjali,1992-09-28,Right,India,United Kingdom
-Nguyen,Tran,1987-07-12,Right,Vietnam,Australia
-Rousseau,Isabelle,1983-02-20,Left,France,France
-Ivanov,Mikhail,1995-12-05,Right,Russia,Germany
-Hernandez,Carlos,1988-06-18,Right,Spain,Spain
-Yamamoto,Sakura,1991-04-10,Right,Japan,Japan
-Okafor,Chidi,1980-10-03,Left,Nigeria,United States
+PlayerID,LastName,FirstName,DOB,Plays,CountryOfBirth,CountryOfResidence
+1,Smith,John,1990-05-15,Right,United States,United States
+2,Garcia,Maria,1985-11-22,Right,Mexico,Canada
+3,Lee,David,1978-03-01,Left,South Korea,United States
+4,Patel,Anjali,1992-09-28,Right,India,United Kingdom
+5,Nguyen,Tran,1987-07-12,Right,Vietnam,Australia
+6,Rousseau,Isabelle,1983-02-20,Left,France,France
+7,Ivanov,Mikhail,1995-12-05,Right,Russia,Germany
+8,Hernandez,Carlos,1988-06-18,Right,Spain,Spain
+9,Yamamoto,Sakura,1991-04-10,Right,Japan,Japan
+10,Okafor,Chidi,1980-10-03,Left,Nigeria,United States

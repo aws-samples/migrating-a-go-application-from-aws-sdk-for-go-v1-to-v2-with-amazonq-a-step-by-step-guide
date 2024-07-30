@@ -8,14 +8,15 @@ import (
 	"github.com/aws/aws-cdk-go/awscdk/v2/awss3"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
+	"go_sdk_amazon_q/lib"
 	"log"
 	"os"
 	"path/filepath"
-	"time"
 )
 
 type GoSdkAmazonQStackProps struct {
 	awscdk.StackProps
+	HitsLambda awslambda.Function
 }
 
 func NewGoSdkWithAmazonQDemoStack(scope constructs.Construct, id string, props *GoSdkAmazonQStackProps) awscdk.Stack {
@@ -24,6 +25,8 @@ func NewGoSdkWithAmazonQDemoStack(scope constructs.Construct, id string, props *
 		sprops = props.StackProps
 	}
 	stack := awscdk.NewStack(scope, &id, &sprops)
+
+	hitsLambda := props.HitsLambda
 
 	// The code that defines your stack goes here
 	path, err := os.Getwd()
@@ -40,19 +43,14 @@ func NewGoSdkWithAmazonQDemoStack(scope constructs.Construct, id string, props *
 		Architecture: awslambda.Architecture_ARM_64(),
 	})
 
-	fmt.Println("Lambda function ARN:", *lambdaFunction.FunctionArn())
-
 	// Create the API Gateway
 	awsapigateway.NewLambdaRestApi(stack, jsii.String("Endpoint"), &awsapigateway.LambdaRestApiProps{
 		Handler: lambdaFunction,
 	})
 
 	// create a s3 bucket
-	// Get the current date
-	now := time.Now()
-
 	// Format the date as a string in the desired format
-	bucketName := fmt.Sprintf("my-bucket-%d%02d%02d", now.Year(), now.Month(), now.Day())
+	bucketName := fmt.Sprintf("my-bucket-20240716")
 
 	// Print the bucket name
 	fmt.Println("Bucket Name:", bucketName)
@@ -65,6 +63,7 @@ func NewGoSdkWithAmazonQDemoStack(scope constructs.Construct, id string, props *
 
 	// Set a bucket name environment variable in lambda function and add permissions to lambda to read from S3 bucket
 	lambdaFunction.AddEnvironment(jsii.String("BUCKET_NAME"), bucket.BucketName(), nil)
+	lambdaFunction.AddEnvironment(jsii.String("HITS_LAMBDA"), hitsLambda.FunctionName(), nil)
 
 	bucket.GrantRead(lambdaFunction, nil)
 
@@ -81,10 +80,17 @@ func main() {
 
 	app := awscdk.NewApp(nil)
 
+	_, hitsLambda := lib.NewDynamoDBStack(app, "DynamoDBStack", &lib.DynamoDBStackProps{
+		awscdk.StackProps{
+			Env: env(),
+		},
+	})
+
 	NewGoSdkWithAmazonQDemoStack(app, "GoSdkAmazonQStack", &GoSdkAmazonQStackProps{
 		awscdk.StackProps{
 			Env: env(),
 		},
+		hitsLambda,
 	})
 
 	app.Synth(nil)
