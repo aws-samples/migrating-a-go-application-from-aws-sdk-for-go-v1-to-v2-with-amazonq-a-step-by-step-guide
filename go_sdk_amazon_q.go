@@ -2,21 +2,23 @@ package main
 
 import (
 	"fmt"
+	"go_sdk_amazon_q/lib"
+	"log"
+	"os"
+	"path/filepath"
+
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsapigateway"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awss3"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
-	"go_sdk_amazon_q/lib"
-	"log"
-	"os"
-	"path/filepath"
 )
 
 type GoSdkAmazonQStackProps struct {
 	awscdk.StackProps
-	HitsLambda awslambda.Function
+	HitsLambda    awslambda.Function
+	getHitsLambda awslambda.Function
 }
 
 func NewGoSdkWithAmazonQDemoStack(scope constructs.Construct, id string, props *GoSdkAmazonQStackProps) awscdk.Stack {
@@ -27,6 +29,7 @@ func NewGoSdkWithAmazonQDemoStack(scope constructs.Construct, id string, props *
 	stack := awscdk.NewStack(scope, &id, &sprops)
 
 	hitsLambda := props.HitsLambda
+	// getHitsLambda := props.getHitsLambda
 
 	// The code that defines your stack goes here
 	path, err := os.Getwd()
@@ -44,13 +47,37 @@ func NewGoSdkWithAmazonQDemoStack(scope constructs.Construct, id string, props *
 	})
 
 	// Create the API Gateway
-	awsapigateway.NewLambdaRestApi(stack, jsii.String("Endpoint"), &awsapigateway.LambdaRestApiProps{
-		Handler: lambdaFunction,
+
+	api := awsapigateway.NewRestApi(stack, jsii.String("HitsAPI"), &awsapigateway.RestApiProps{
+		RestApiName: jsii.String("HitsAPI"),
+		Description: jsii.String("This is my HitsAPI"),
 	})
+
+	getPlayers := api.Root().AddResource(jsii.String("getPlayers"), nil)
+	updateHits := api.Root().AddResource(jsii.String("updateHits"), nil)
+	getHits := api.Root().AddResource(jsii.String("getHits"), nil)
+
+	getPlayers.AddMethod(jsii.String("GET"), awsapigateway.NewLambdaIntegration(lambdaFunction, &awsapigateway.LambdaIntegrationOptions{}), &awsapigateway.MethodOptions{
+		MethodResponses: &[]*awsapigateway.MethodResponse{
+			{StatusCode: jsii.String("200")},
+		},
+	})
+	updateHits.AddMethod(jsii.String("POST"), awsapigateway.NewLambdaIntegration(props.HitsLambda, &awsapigateway.LambdaIntegrationOptions{}), &awsapigateway.MethodOptions{
+		MethodResponses: &[]*awsapigateway.MethodResponse{
+			{StatusCode: jsii.String("200")},
+		},
+	})
+	getHits.AddMethod(jsii.String("GET"), awsapigateway.NewLambdaIntegration(props.getHitsLambda, &awsapigateway.LambdaIntegrationOptions{}), &awsapigateway.MethodOptions{
+		MethodResponses: &[]*awsapigateway.MethodResponse{
+			{StatusCode: jsii.String("200")},
+		},
+	})
+
+	// Create the S3 bucket
 
 	// create a s3 bucket
 	// Format the date as a string in the desired format
-	bucketName := fmt.Sprintf("my-bucket-20240716")
+	bucketName := fmt.Sprintf("my-bucket-20240730")
 
 	// Print the bucket name
 	fmt.Println("Bucket Name:", bucketName)
@@ -80,7 +107,7 @@ func main() {
 
 	app := awscdk.NewApp(nil)
 
-	_, hitsLambda := lib.NewDynamoDBStack(app, "DynamoDBStack", &lib.DynamoDBStackProps{
+	_, hitsLambda, getHitsLambda := lib.NewDynamoDBStack(app, "DynamoDBStack", &lib.DynamoDBStackProps{
 		awscdk.StackProps{
 			Env: env(),
 		},
@@ -91,6 +118,7 @@ func main() {
 			Env: env(),
 		},
 		hitsLambda,
+		getHitsLambda,
 	})
 
 	app.Synth(nil)
