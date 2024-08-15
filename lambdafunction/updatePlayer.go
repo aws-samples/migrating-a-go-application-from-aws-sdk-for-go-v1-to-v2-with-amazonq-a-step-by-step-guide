@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
-type playerWithHits struct {
+type playerWithHitsBody struct {
 	PlayerID           string `json:"player_id"`
 	LastName           string `json:"lastName"`
 	FirstName          string `json:"firstName"`
@@ -24,37 +23,23 @@ type playerWithHits struct {
 }
 
 // Create the handler function and put and update player
-func HandleRequest(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func HandleRequest(request playerWithHitsBody) (string, error) {
 
 	// Print the incoming request
 	fmt.Printf("Received request: %v\n", request)
 	tableName := os.Getenv("DYNAMODB_TABLE_NAME")
 
-	ApiResponse := events.APIGatewayProxyResponse{}
+	result, err := UpdateHits(request, tableName)
 
-	switch request.HTTPMethod {
-	case "POST":
-		var requestBody playerWithHits
-		var err = json.Unmarshal([]byte(request.Body), &requestBody)
-		if err != nil {
-			return ApiResponse, fmt.Errorf("Error unmarshaling request body: %v", err)
-		}
+	if err != nil {
+		return "", err
+	}
+	fmt.Println("The result is %v", result)
 
-		fmt.Printf("Received request: %v\n", requestBody.PlayerID)
-		// playerId := requestBody
-		err = UpdateHits(requestBody, tableName)
-		if err != nil {
-			return ApiResponse, err
-		}
-	}
-	ApiResponse = events.APIGatewayProxyResponse{
-		StatusCode: 200,
-		Body:       "Player updated successfully",
-	}
-	return ApiResponse, nil
+	return result, err
 }
 
-func UpdateHits(requestBody playerWithHits, tableName string) error {
+func UpdateHits(requestBody playerWithHitsBody, tableName string) (string, error) {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
@@ -71,17 +56,58 @@ func UpdateHits(requestBody playerWithHits, tableName string) error {
 				S: aws.String(requestBody.PlayerID),
 			},
 		},
-		UpdateExpression: aws.String("ADD hits :incr"),
+		UpdateExpression: aws.String("SET lastName = :l, firstName = :f, dob = :dob, plays = :plays, countryOfBirth = :cob, countryOfResidence = :cor, hits = if_not_exists(hits, :zero) + :incr"),
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":l": {
+				S: aws.String(requestBody.LastName),
+			},
+			":f": {
+				S: aws.String(requestBody.FirstName),
+			},
+			":dob": {
+				S: aws.String(requestBody.DOB),
+			},
+			":plays": {
+				S: aws.String(requestBody.Plays),
+			},
+			":cob": {
+				S: aws.String(requestBody.CountryOfBirth),
+			},
+			":cor": {
+				S: aws.String(requestBody.CountryOfResidence),
+			},
 			":incr": {
 				N: aws.String("1"),
+			},
+			":zero": {
+				N: aws.String("0"),
 			},
 		},
 		ReturnValues: aws.String("UPDATED_NEW"),
 	}
+	fmt.Println("The input is %v", input)
 
-	_, err := svc.UpdateItem(input)
-	return err
+	output, err := svc.UpdateItem(input)
+	if err != nil {
+		return "", err
+	}
+	fmt.Println("The output is %v", output)
+
+	// Convert the updated item attributes to JSON
+	updatedItem := map[string]*dynamodb.AttributeValue{}
+
+	for k, v := range output.Attributes {
+		updatedItem[k] = v
+	}
+	fmt.Println("The updated item uncoded is %v", updatedItem)
+	jsonBytes, err := json.Marshal(updatedItem)
+	if err != nil {
+		return "", err
+	}
+	fmt.Println("The updated item is %v", string(jsonBytes))
+
+	return string(jsonBytes), nil
+
 }
 
 func main() {

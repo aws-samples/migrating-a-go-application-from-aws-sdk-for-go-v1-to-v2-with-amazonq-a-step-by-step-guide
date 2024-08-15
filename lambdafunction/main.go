@@ -7,21 +7,22 @@ import (
 	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-lambda-go/lambda"
+	lambdaHandler "github.com/aws/aws-lambda-go/lambda"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	lambdaService "github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
 type Player struct {
-	PlayerID           string
-	LastName           string
-	FirstName          string
-	DOB                string
-	Plays              string
-	CountryOfBirth     string
-	CountryOfResidence string
+	PlayerID           string `json:"player_id"`
+	LastName           string `json:"lastName"`
+	FirstName          string `json:"firstname"`
+	DOB                string `json:"dob"`
+	Plays              string `json:"plays"`
+	CountryOfBirth     string `json:"countryOfBirth"`
+	CountryOfResidence string `json:"countryOfResidence"`
 }
 
 type playerWithHits struct {
@@ -106,32 +107,43 @@ func HandleRequest(request events.APIGatewayProxyRequest) (events.APIGatewayProx
 					Hits:   1,
 				}
 				fmt.Println("Player with hits %v", playerWithHits)
+				// Convert the filtered players to JSON
+				jsonData2, err2 := json.Marshal(player)
+				if err != nil {
+					fmt.Printf("Error marshaling JSON: %v", err)
+					ApiResponse.Body = "Error marshaling JSON"
+					ApiResponse.StatusCode = 400
+					return ApiResponse, nil
+				}
+
+				svc := lambdaService.New(sess)
+
+				input := &lambdaService.InvokeInput{
+					FunctionName:   &hitsLambda,
+					InvocationType: aws.String("Event"),
+					Payload:        jsonData2, // Replace with your desired payload,
+				}
+
+				_, err := svc.Invoke(input)
+				if err != nil {
+					fmt.Println("Error invoking Lambda function:", err)
+					return ApiResponse, err2
+				}
+				ApiResponse = events.APIGatewayProxyResponse{
+					StatusCode: 200,
+					Body:       string(jsonData2),
+				}
 
 			}
-		}
-
-		// Convert the filtered players to JSON
-		jsonData, err := json.Marshal(filteredPlayers)
-		if err != nil {
-			fmt.Printf("Error marshaling JSON: %v", err)
-			ApiResponse.Body = "Error marshaling JSON"
-			ApiResponse.StatusCode = 400
-			return ApiResponse, nil
-		}
-
-		// return ApiResponse as json
-		ApiResponse = events.APIGatewayProxyResponse{
-			StatusCode: 200,
-			Body:       string(jsonData),
 		}
 
 	}
 
 	// Response
-	return ApiResponse, nil
+	return ApiResponse, err
 
 }
 
 func main() {
-	lambda.Start(HandleRequest)
+	lambdaHandler.Start(HandleRequest)
 }
