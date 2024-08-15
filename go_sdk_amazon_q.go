@@ -9,6 +9,7 @@ import (
 
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsapigateway"
+	"github.com/aws/aws-cdk-go/awscdk/v2/awsiam"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awss3"
 	"github.com/aws/constructs-go/constructs/v10"
@@ -29,7 +30,6 @@ func NewGoSdkWithAmazonQDemoStack(scope constructs.Construct, id string, props *
 	stack := awscdk.NewStack(scope, &id, &sprops)
 
 	hitsLambda := props.HitsLambda
-	// getHitsLambda := props.getHitsLambda
 
 	// The code that defines your stack goes here
 	path, err := os.Getwd()
@@ -46,6 +46,16 @@ func NewGoSdkWithAmazonQDemoStack(scope constructs.Construct, id string, props *
 		Architecture: awslambda.Architecture_ARM_64(),
 	})
 
+	lambdaRole := lambdaFunction.Role()
+
+	invokePermissionStatement := awsiam.NewPolicyStatement(&awsiam.PolicyStatementProps{
+		Effect:    awsiam.Effect_ALLOW,
+		Actions:   jsii.Strings("lambda:InvokeFunction"),
+		Resources: jsii.Strings(*hitsLambda.FunctionArn()),
+	})
+
+	lambdaRole.AddToPrincipalPolicy(invokePermissionStatement)
+
 	// Create the API Gateway
 
 	api := awsapigateway.NewRestApi(stack, jsii.String("HitsAPI"), &awsapigateway.RestApiProps{
@@ -54,15 +64,9 @@ func NewGoSdkWithAmazonQDemoStack(scope constructs.Construct, id string, props *
 	})
 
 	getPlayers := api.Root().AddResource(jsii.String("getPlayers"), nil)
-	updateHits := api.Root().AddResource(jsii.String("updateHits"), nil)
 	getHits := api.Root().AddResource(jsii.String("getHits"), nil)
 
 	getPlayers.AddMethod(jsii.String("GET"), awsapigateway.NewLambdaIntegration(lambdaFunction, &awsapigateway.LambdaIntegrationOptions{}), &awsapigateway.MethodOptions{
-		MethodResponses: &[]*awsapigateway.MethodResponse{
-			{StatusCode: jsii.String("200")},
-		},
-	})
-	updateHits.AddMethod(jsii.String("POST"), awsapigateway.NewLambdaIntegration(props.HitsLambda, &awsapigateway.LambdaIntegrationOptions{}), &awsapigateway.MethodOptions{
 		MethodResponses: &[]*awsapigateway.MethodResponse{
 			{StatusCode: jsii.String("200")},
 		},
@@ -74,19 +78,12 @@ func NewGoSdkWithAmazonQDemoStack(scope constructs.Construct, id string, props *
 	})
 
 	// Create the S3 bucket
-
-	// create a s3 bucket
-	// Format the date as a string in the desired format
-	bucketName := fmt.Sprintf("my-bucket-20240730")
-
-	// Print the bucket name
-	fmt.Println("Bucket Name:", bucketName)
-
-	// Create an S3 bucket
-	bucket := awss3.NewBucket(stack, jsii.String("jrtestaccessbucket"), &awss3.BucketProps{
-		BucketName:    jsii.String(bucketName), // Convert bucketName to *string
+	bucket := awss3.NewBucket(stack, jsii.String("amazonqgosdk"), &awss3.BucketProps{
+		//BucketName:    jsii.String(bucketName), // Convert bucketName to *string
 		RemovalPolicy: awscdk.RemovalPolicy_DESTROY,
 	})
+
+	fmt.Println("Bucket Name:", *bucket.BucketName())
 
 	// Set a bucket name environment variable in lambda function and add permissions to lambda to read from S3 bucket
 	lambdaFunction.AddEnvironment(jsii.String("BUCKET_NAME"), bucket.BucketName(), nil)

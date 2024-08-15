@@ -15,13 +15,24 @@ import (
 )
 
 type GetPlayer struct {
-	PlayerID int `json:"player_id"`
-	Hits     int `json:"hits"`
+	PlayerID           int    `json:"player_id"`
+	LastName           string `json:"lastName"`
+	FirstName          string `json:"firstName"`
+	DOB                string `json:"dob"`
+	Plays              string `json:"plays"`
+	CountryOfBirth     string `json:"countryOfBirth"`
+	CountryOfResidence string `json:"countryOfResidence"`
+	Hits               int    `json:"hits"`
 }
-
 type PlayerResult struct {
-	PlayerID string `json:"player_id"`
-	Hits     string `json:"hits"`
+	PlayerID           string `json:"player_id"`
+	LastName           string `json:"lastName"`
+	FirstName          string `json:"firstName"`
+	DOB                string `json:"dob"`
+	Plays              string `json:"plays"`
+	CountryOfBirth     string `json:"countryOfBirth"`
+	CountryOfResidence string `json:"countryOfResidence"`
+	Hits               int    `json:"hits"`
 }
 
 func HitCounter(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
