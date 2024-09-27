@@ -34,7 +34,7 @@ func HandlePlayerRequest(request playerWithHitsBody) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Println("The result is %v", result)
+	fmt.Printf("The result is %v\n", result)
 
 	return result, err
 }
