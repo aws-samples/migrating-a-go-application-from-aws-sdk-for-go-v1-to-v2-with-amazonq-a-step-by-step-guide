@@ -22,8 +22,8 @@ type playerWithHitsBody struct {
 	Hits               int    `json:"hits"`
 }
 
-// Create the handler function and put and update player
-func HandleRequest(request playerWithHitsBody) (string, error) {
+// HandlePlayerRequest Create the handler function and put and update player
+func HandlePlayerRequest(request playerWithHitsBody) (string, error) {
 
 	// Print the incoming request
 	fmt.Printf("Received request: %v\n", request)
@@ -34,7 +34,7 @@ func HandleRequest(request playerWithHitsBody) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Println("The result is %v", result)
+	fmt.Printf("The result is %v\n", result)
 
 	return result, err
 }
@@ -47,7 +47,7 @@ func UpdateHits(requestBody playerWithHitsBody, tableName string) (string, error
 	svc := dynamodb.New(sess)
 
 	// Player to update is
-	fmt.Println("The player to update is %v", requestBody.PlayerID)
+	fmt.Printf("The player to update is %v\n", requestBody.PlayerID)
 
 	input := &dynamodb.UpdateItemInput{
 		TableName: aws.String(tableName),
@@ -85,13 +85,13 @@ func UpdateHits(requestBody playerWithHitsBody, tableName string) (string, error
 		},
 		ReturnValues: aws.String("UPDATED_NEW"),
 	}
-	fmt.Println("The input is %v", input)
+	fmt.Printf("The input is %v\n", input)
 
 	output, err := svc.UpdateItem(input)
 	if err != nil {
 		return "", err
 	}
-	fmt.Println("The output is %v", output)
+	fmt.Printf("The output is %v\n", output)
 
 	// Convert the updated item attributes to JSON
 	updatedItem := map[string]*dynamodb.AttributeValue{}
@@ -99,17 +99,17 @@ func UpdateHits(requestBody playerWithHitsBody, tableName string) (string, error
 	for k, v := range output.Attributes {
 		updatedItem[k] = v
 	}
-	fmt.Println("The updated item uncoded is %v", updatedItem)
+	fmt.Printf("The updated item uncoded is %v\n", updatedItem)
 	jsonBytes, err := json.Marshal(updatedItem)
 	if err != nil {
 		return "", err
 	}
-	fmt.Println("The updated item is %v", string(jsonBytes))
+	fmt.Printf("The updated item is %v\n", string(jsonBytes))
 
 	return string(jsonBytes), nil
 
 }
 
 func main() {
-	lambda.Start(HandleRequest)
+	lambda.Start(HandlePlayerRequest)
 }

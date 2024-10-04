@@ -53,7 +53,7 @@ func HitCounter(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRe
 		fmt.Printf("Received request: %v\n", request.QueryStringParameters["player_id"])
 		var err = json.Unmarshal([]byte(request.QueryStringParameters["player_id"]), &requestBody.PlayerID)
 		if err != nil {
-			return ApiResponse, fmt.Errorf("Error unmarshaling request body: %v", err)
+			return ApiResponse, fmt.Errorf("error unmarshaling request body: %v", err)
 		}
 
 		input := &dynamodb.GetItemInput{
@@ -70,7 +70,7 @@ func HitCounter(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRe
 		}
 
 		if result.Item == nil {
-			msg := "Could not find"
+			msg := "could not find"
 			return ApiResponse, errors.New(msg)
 		}
 

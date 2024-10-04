@@ -88,7 +88,7 @@ func HandleRequest(request events.APIGatewayProxyRequest) (events.APIGatewayProx
 
 			// Filter for specific first name or last name
 			if strings.EqualFold(firstName, request.QueryStringParameters["firstName"]) || strings.EqualFold(lastName, request.QueryStringParameters["lastName"]) {
-				fmt.Println("Found a match for the player %v", line)
+				fmt.Printf("Found a match for the player %v\n", line)
 				player := Player{
 					PlayerID:           fields[0],
 					LastName:           fields[1],
@@ -100,15 +100,15 @@ func HandleRequest(request events.APIGatewayProxyRequest) (events.APIGatewayProx
 				}
 				// return this line as a response
 				filteredPlayers = append(filteredPlayers, player)
-				fmt.Println("Calling hitslambda %v", line)
+				fmt.Printf("Calling hitslambda %v\n", line)
 				// update struct with hits
 				playerWithHits := playerWithHits{
 					Player: player,
 					Hits:   1,
 				}
-				fmt.Println("Player with hits %v", playerWithHits)
+				fmt.Printf("Player with hits %v\n", playerWithHits)
 				// Convert the filtered players to JSON
-				jsonData2, err2 := json.Marshal(player)
+				jsonData2, err := json.Marshal(player)
 				if err != nil {
 					fmt.Printf("Error marshaling JSON: %v", err)
 					ApiResponse.Body = "Error marshaling JSON"
@@ -124,10 +124,10 @@ func HandleRequest(request events.APIGatewayProxyRequest) (events.APIGatewayProx
 					Payload:        jsonData2, // Replace with your desired payload,
 				}
 
-				_, err := svc.Invoke(input)
+				_, err = svc.Invoke(input)
 				if err != nil {
 					fmt.Println("Error invoking Lambda function:", err)
-					return ApiResponse, err2
+					return ApiResponse, err
 				}
 				ApiResponse = events.APIGatewayProxyResponse{
 					StatusCode: 200,
