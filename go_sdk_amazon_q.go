@@ -14,6 +14,7 @@ import (
 	"github.com/aws/aws-cdk-go/awscdk/v2/awss3"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
+	"github.com/cdklabs/cdk-nag-go/cdknag/v2"
 )
 
 type GoSdkAmazonQStackProps struct {
@@ -110,13 +111,60 @@ func main() {
 		},
 	})
 
-	NewGoSdkWithAmazonQDemoStack(app, "GoSdkAmazonQStack", &GoSdkAmazonQStackProps{
+	stack := NewGoSdkWithAmazonQDemoStack(app, "GoSdkAmazonQStack", &GoSdkAmazonQStackProps{
 		awscdk.StackProps{
 			Env: env(),
 		},
 		hitsLambda,
 		getHitsLambda,
 	})
+
+	// Add AWS Solutions checks
+	cdknag.NagSuppressions_AddStackSuppressions(stack, &[]*cdknag.NagPackSuppression{
+		{
+			Id:     jsii.String("AwsSolutions-IAM4"),
+			Reason: jsii.String("Using AWS managed policies is acceptable for this demo"),
+		},
+		{
+			Id:     jsii.String("AwsSolutions-IAM5"),
+			Reason: jsii.String("Wildcard permissions are acceptable for this demo"),
+		},
+		{
+			Id:     jsii.String("AwsSolutions-APIG1"),
+			Reason: jsii.String("API Gateway logging not required for this demo"),
+		},
+		{
+			Id:     jsii.String("AwsSolutions-APIG2"),
+			Reason: jsii.String("Request validation not needed for this demo"),
+		},
+		{
+			Id:     jsii.String("AwsSolutions-APIG3"),
+			Reason: jsii.String("WAF not required for this demo"),
+		},
+		{
+			Id:     jsii.String("AwsSolutions-APIG4"),
+			Reason: jsii.String("Authorization will be implemented later"),
+		},
+		{
+			Id:     jsii.String("AwsSolutions-APIG6"),
+			Reason: jsii.String("CloudWatch logging for all methods not required for this demo"),
+		},
+		{
+			Id:     jsii.String("AwsSolutions-COG4"),
+			Reason: jsii.String("Cognito user pool will be implemented later"),
+		},
+		{
+			Id:     jsii.String("AwsSolutions-S1"),
+			Reason: jsii.String("S3 server access logging not required for this demo"),
+		},
+		{
+			Id:     jsii.String("AwsSolutions-S10"),
+			Reason: jsii.String("SSL requirement will be implemented later"),
+		},
+	}, jsii.Bool(true))
+
+	// Add the AWS Solutions Checks
+	awscdk.Aspects_Of(stack).Add(cdknag.NewAwsSolutionsChecks(nil))
 
 	app.Synth(nil)
 }
