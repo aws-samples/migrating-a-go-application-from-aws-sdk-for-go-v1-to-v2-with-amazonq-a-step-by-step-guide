@@ -1,80 +1,51 @@
 # Welcome to your CDK Go project!
 
-This is a project for CDK development with Go.
+## Commands to Deploy Go CDK Project
 
-The `cdk.json` file tells the CDK toolkit how to execute your app.
+## Prerequisites 
 
+To follow along with this tutorial, you should have the following prerequisites:
 
-Add Step "Set GOPROXY=direct" # Note to customer
+* An AWS [account](https://signin.aws.amazon.com/signin?redirect_uri=https%3A%2F%2Fportal.aws.amazon.com%2Fbilling%2Fsignup%2Fresume&client_id=signup)
 
+* [AWS Command Line Interface (CLI)](https://aws.amazon.com/cli/) version 1.25 or later installed and configured on your workstation.
 
+* git, AWS CDK, GO and curl  to deploy and test the application
+    * Installation instructions for [git](https://github.com/git-guides/install-git), [AWS CDK](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html), [CURL](https://curl.se/download.html)
 
-```
-[comment]: ??? - Build Steps may not be need if we add to repo
+ ## Deploy Sample GO Environment
+ The following steps will guide you through deploying the Sample Go project to your account.
+1. If you have ***not*** deployed CloudFormation stacks before using **cdk**, you will have to run **cdk bootstrap** one time for your account/region.  For more details refer to [cdk bootstrap](https://docs.aws.amazon.com/cdk/v2/guide/ref-cli-cmd-bootstrap.html).  If you have run **cdk bootstrap** before please skip this step.
+    ```
+    $ cdk bootstrap
+    ```
+2. **cdk deploy --all** to deploy all stacks to your default AWS account/region.  There are a total of two stacks to deploy '***DynamoDBStack***' and '***GoSdkAmazonQStack***'. 
+    ```
+    $ cdk deploy --all
+    ```
+    Type 'y' to confirm the prompt for the '***DynamoDBStack***' stack  'Do you wish to deploy these changes (y/n)?'
+    
+    ![First CDK Prompt](./images/cdk_deploy_p1.png)
 
- #> GOOS=linux GOARCH=arm64 go build -o bootstrap lambdafunction/main.go
+    Type 'y' to confirm the prompt for the '***GoSdkAmazonQStack***' stack  'Do you wish to deploy these changes (y/n)?'  
 
-zip myFunction.zip bootstrap
+    ![Second CDK Prompt](./images/cdk_deploy_p2.png)<br><br/>
 
-GOOS=linux GOARCH=arm64 go build -o bootstrap lambdafunction/hitcounter.go
+3. When the deploy is complete you will see '***Outputs:***' where you will copy the API Gateway endpoint url for the next step (See Below).
+    
+    ![CDK Output](./images/cdk_output_gateway.png)<br><br/>
+4. Now that we have to deploy the CDK sample Go stacks. We need to test make the sample application with a curl command and the endpoint url we copied from the previous step.<br><br/>
 
-zip getHits.zip bootstrap
+    ```curl -sX GET "https://{url}/getPlayers/?firstName=Carlos" | jq```<br><br/>
 
+    Make sure to the suffix ***getPlayers/?firstName=Carlos | jq*** to your url address. The completed command should look like the following example:<br><br/>
+    
+    **Example**
+    ```curl -sX GET "https://rxncm1fbxaexample.execute-api.us-east-1.amazonaws.com/prod/getPlayers/?firstName=Carlos" | jq```<br><br/>
 
-GOOS=linux GOARCH=arm64 go build -o bootstrap lambdafunction/updatePlayer.go
+5.  Run the curl command and confirm you see the following output.
 
-zip hitsLambda.zip bootstrap
-
-cdk bootstrap
-
-cdk deploy --all
-```
-# Next Test Deployment
-1. Next we need to confirm that cdk deployment is working.
-[comment]: https://rxncm1fbxa.execute-api.us-east-1.amazonaws.com/prod/
-```
-curl -sX GET "https://rxncm1fbxa.execute-api.us-east-1.amazonaws.com/prod/getPlayers/?firstName=Carlos" | jq
-```
-
-
-
-## Commands to Deploy Go Project
-
- ## Instructions to Deploy Sample GO Environment
-1.  `cdk bootstrap`                  For the first time bootstrap in the account/region
-```
-#> cdkbootstrap
-```
-2. `cdk deploy`                     deploy this stack to your default AWS account/region , set AWS_REGION 
-3. `cdk diff`                       compare deployed stack with current state
-
+    ![Successful Curl](./images/curl_successful.png)
  
  
- 
- 
- * `GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o bootstrap lambdafunction/main.go`                           Build the Lambda
-
-
- * `cdk deploy`                     deploy this stack to your default AWS account/region , set AWS_REGION 
- * `cdk diff`                       compare deployed stack with current state
- * `cdk synth`                      emits the synthesized CloudFormation template
- * `cdk bootstrap`                  For the first time bootstrap in the account/region
- * `go test`                        run unit tests
-
-
-API response (AWS SDK v1):
-curl -sX GET "https://xxxxxxx.execute-api.us-west-2.amazonaws.com/prod/?firstName=Carlos" | jq
-[
-{
-"LastName": "Hernandez",
-"FirstName": "Carlos",
-"DOB": "1988-06-18",
-"Plays": "Right",
-"CountryOfBirth": "Spain",
-"CountryOfResidence": "Spain"
-}
-]
-
-[comment:] # Need to create a folder in S3 Bucket and upload players.csv - CDK Change
-[comment:] activeplayers/players.csv
 
