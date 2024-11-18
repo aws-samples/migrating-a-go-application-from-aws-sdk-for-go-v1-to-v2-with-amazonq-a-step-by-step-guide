@@ -8,10 +8,10 @@ To follow along with this tutorial, you should have the following prerequisites:
 
 * [AWS Command Line Interface (CLI)](https://aws.amazon.com/cli/) version 1.25 or later installed and configured on your workstation.
 
-* git, AWS CDK, GO and curl  to deploy and test the application
-    * Installation instructions for [git](https://github.com/git-guides/install-git), [AWS CDK](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html), [CURL](https://curl.se/download.html)
+* git, AWS CDK, Go and curl  to deploy and test the application
+    * Installation instructions for [git](https://github.com/git-guides/install-git), [AWS CDK](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html), [curl](https://curl.se/download.html)
 
- ## Deploy Sample GO Environment
+ ## Deploy Sample Go Environment
  The following steps will guide you through deploying the Sample Go project to your account.
 1. If you have ***not*** deployed CloudFormation stacks before using **cdk**, you will have to run **'cdk bootstrap'** one time for your account/region.  For more details refer to [cdk bootstrap](https://docs.aws.amazon.com/cdk/v2/guide/ref-cli-cmd-bootstrap.html).  If you have run **'cdk bootstrap'** before please skip this step.
     ```
@@ -36,7 +36,7 @@ To follow along with this tutorial, you should have the following prerequisites:
 
     ```curl -sX GET "https://{Enter your Hits API Endpoint URL here}/getPlayers/?firstName=Carlos" | jq```<br><br/>
 
-    Make sure to the suffix ***'getPlayers/?firstName=Carlos | jq'*** to your url address. The completed command should look like the following example:<br><br/>
+    Make sure to add the suffix ***'getPlayers/?firstName=Carlos | jq'*** to your url address. The completed command should look like the following example:<br><br/>
     
     **Example**
     ```
