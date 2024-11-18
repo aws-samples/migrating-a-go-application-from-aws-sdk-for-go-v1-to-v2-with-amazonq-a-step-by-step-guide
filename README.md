@@ -1,7 +1,5 @@
 # Welcome to your CDK Go project!
 
-## Commands to Deploy Go CDK Project
-
 ## Prerequisites 
 
 To follow along with this tutorial, you should have the following prerequisites:
@@ -15,11 +13,11 @@ To follow along with this tutorial, you should have the following prerequisites:
 
  ## Deploy Sample GO Environment
  The following steps will guide you through deploying the Sample Go project to your account.
-1. If you have ***not*** deployed CloudFormation stacks before using **cdk**, you will have to run **cdk bootstrap** one time for your account/region.  For more details refer to [cdk bootstrap](https://docs.aws.amazon.com/cdk/v2/guide/ref-cli-cmd-bootstrap.html).  If you have run **cdk bootstrap** before please skip this step.
+1. If you have ***not*** deployed CloudFormation stacks before using **cdk**, you will have to run **'cdk bootstrap'** one time for your account/region.  For more details refer to [cdk bootstrap](https://docs.aws.amazon.com/cdk/v2/guide/ref-cli-cmd-bootstrap.html).  If you have run **'cdk bootstrap'** before please skip this step.
     ```
     $ cdk bootstrap
     ```
-2. **cdk deploy --all** to deploy all stacks to your default AWS account/region.  There are a total of two stacks to deploy '***DynamoDBStack***' and '***GoSdkAmazonQStack***'. 
+2. Next use the **'cdk deploy --all'** command to deploy all stacks to your default AWS account/region.  There are a total of two stacks to deploy '***DynamoDBStack***' and '***GoSdkAmazonQStack***'. 
     ```
     $ cdk deploy --all
     ```
@@ -36,14 +34,15 @@ To follow along with this tutorial, you should have the following prerequisites:
     ![CDK Output](./images/cdk_output_gateway.png)<br><br/>
 4. Now that we have to deploy the CDK sample Go stacks. We need to test make the sample application with a curl command and the endpoint url we copied from the previous step.<br><br/>
 
-    ```curl -sX GET "https://{url}/getPlayers/?firstName=Carlos" | jq```<br><br/>
+    ```curl -sX GET "https://{Enter your Hits API Endpoint URL here}/getPlayers/?firstName=Carlos" | jq```<br><br/>
 
-    Make sure to the suffix ***getPlayers/?firstName=Carlos | jq*** to your url address. The completed command should look like the following example:<br><br/>
+    Make sure to the suffix ***'getPlayers/?firstName=Carlos | jq'*** to your url address. The completed command should look like the following example:<br><br/>
     
     **Example**
-    ```curl -sX GET "https://rxncm1fbxaexample.execute-api.us-east-1.amazonaws.com/prod/getPlayers/?firstName=Carlos" | jq```<br><br/>
-
-5.  Run the curl command and confirm you see the following output.
+    ```
+    $ curl -sX GET "https://rxncm1fbxaexample.execute-api.us-east-1.amazonaws.com/prod/getPlayers/?firstName=Carlos" | jq
+    ```
+5. Run the curl command and confirm you see the following output.
 
     ![Successful Curl](./images/curl_successful.png)
  
