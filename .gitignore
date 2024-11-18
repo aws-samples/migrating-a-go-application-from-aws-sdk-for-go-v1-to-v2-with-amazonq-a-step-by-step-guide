@@ -4,8 +4,9 @@
 *.dll
 *.so
 *.dylib
+*.DS_Store
 bootstrap
-myFunction.zip
+#myFunction.zip
 
 # Test binary, built with `go test -c`
 *.test
