@@ -4,7 +4,8 @@
 *.dll
 *.so
 *.dylib
-*.DS_Store
+**/.DS_Store
+/.DS_Store
 bootstrap
 #myFunction.zip
 

@@ -33,16 +33,23 @@ To follow along with this tutorial, you should have the following prerequisites:
     
     ![CDK Output](./images/cdk_output_gateway.png)<br><br/>
 4. Now that we have to deploy the CDK sample Go stacks. We need to test make the sample application with a curl command and the endpoint url we copied from the previous step.<br><br/>
+    **Mac / Linux**
+    ```$ curl -sX GET "https://{Enter your Hits API Endpoint URL here}/getPlayers/?firstName=Carlos" | jq```<br><br/>
 
-    ```curl -sX GET "https://{Enter your Hits API Endpoint URL here}/getPlayers/?firstName=Carlos" | jq```<br><br/>
+    **Windows - PowerShell**
+    ```> (Invoke-WebRequest -Uri "https://{Enter your Hits API Endpoint URL here}/getPlayers/?firstName=Carlos").Content | jq```<br><br/>
 
     Make sure to add the suffix ***'getPlayers/?firstName=Carlos | jq'*** to your url address. The completed command should look like the following example:<br><br/>
     
-    **Example**
+    **Mac/Linux Example**
     ```
     $ curl -sX GET "https://rxncm1fbxaexample.execute-api.us-east-1.amazonaws.com/prod/getPlayers/?firstName=Carlos" | jq
     ```
-5. Run the curl command and confirm you see the following output.
+    **Windows PowerShell Example**
+    ```
+    > (Invoke-WebRequest -Uri "https://rxncm1fbxaexample.execute-api.us-east-1.amazonaws.com/prod/getPlayers/?firstName=Carlos").Content | jq
+    ```
+5. Run the command and confirm you see the following output.
 
     ![Successful Curl](./images/curl_successful.png)
  
