@@ -12,6 +12,8 @@ import (
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsiam"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awslambda"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awss3"
+	s3deploy "github.com/aws/aws-cdk-go/awscdk/v2/awss3deployment" // Added for deployment
+	assets "github.com/aws/aws-cdk-go/awscdk/v2/awss3assets" // Added for deployment
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
 	"github.com/cdklabs/cdk-nag-go/cdknag/v2"
@@ -83,7 +85,21 @@ func NewGoSdkWithAmazonQDemoStack(scope constructs.Construct, id string, props *
 		//BucketName:    jsii.String(bucketName), // Convert bucketName to *string
 		RemovalPolicy: awscdk.RemovalPolicy_DESTROY,
 	})
+	
+     // Specify asset options
+	 assetOptions := &assets.AssetOptions{
+        // Example: exclude certain files from the asset bundle
+        Exclude: jsii.Strings("*.tmp", "*.log"),
+	 }
 
+    // Deploy files to the S3 bucket
+    s3deploy.NewBucketDeployment(stack, jsii.String("DeployFiles"), &s3deploy.BucketDeploymentProps{
+        Sources: &[]s3deploy.ISource{s3deploy.Source_Asset(jsii.String("./activeplayers"), assetOptions)},
+        DestinationBucket: bucket,
+        DestinationKeyPrefix: jsii.String("activeplayers/"), // Optional: folder in the bucket
+    })
+	
+					
 	fmt.Println("Bucket Name:", *bucket.BucketName())
 
 	// Set a bucket name environment variable in lambda function and add permissions to lambda to read from S3 bucket
@@ -96,7 +112,7 @@ func NewGoSdkWithAmazonQDemoStack(scope constructs.Construct, id string, props *
 	awscdk.NewCfnOutput(stack, jsii.String("BucketName"), &awscdk.CfnOutputProps{
 		Value: bucket.BucketName(),
 	})
-
+	
 	return stack
 }
 
@@ -161,6 +177,12 @@ func main() {
 			Id:     jsii.String("AwsSolutions-S10"),
 			Reason: jsii.String("SSL requirement will be implemented later"),
 		},
+		// Add suppression for AwsSolutions-L1: The non-container Lambda function is not configured to use the latest runtime version.
+		{
+			Id:     jsii.String("AwsSolutions-L1"),
+			Reason: jsii.String("The non-container Lambda function is not configured to use the latest runtime version."),
+		},
+		
 	}, jsii.Bool(true))
 
 	// Add the AWS Solutions Checks
