@@ -16,13 +16,10 @@ For this part of the blog you should have the following prerequisites:
 
     * For Both [Visual Studio](https://marketplace.visualstudio.com/items?itemName=AmazonWebServices.amazon-q-vscode) and [JetBrains](https://plugins.jetbrains.com/plugin/24267-amazon-q/) IDEs you will need to Authenticate using free builder ID or IAM Identity Center with a Amazon Q Developer Pro subscription as documented in [Authenticating in Visual Studio Code](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/q-in-IDE-setup.html#setup-vscode) or [Authenticating in JetBrains IDEs](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/q-in-IDE-setup.html#setup-jetbrains)
 
-<!--- * git, AWS CDK, Go and curl  to deploy and test the application
-    * Installation instructions for [git](https://github.com/git-guides/install-git), [AWS CDK](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html), [curl](https://curl.se/download.html) --->
-
 ## Analyze Current Code with Amazon Q Developer
 The Amazon Q Developer Agent for software development can help you develop code features or make code changes to projects in your integrated development environment (IDE). You explain the task you want to accomplish, and Amazon Q uses the context of your current project or workspace to generate code to implement the changes. Amazon Q can help you build AWS projects or your own applications.
 
-The following steps will guide you through using Amazon Q developer in our IDE to help us get familiar our Application code using AWS SDK for GO v1 and to create a CodeExplaination.md using [/dev](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/software-dev.html#develop) 
+The following steps will guide you through using Amazon Q developer in our IDE to help us get familiar our Application code using AWS SDK for GO v1 and to create a "CodeExplaination.md" file using [/dev](https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/software-dev.html#develop) 
 
 1. Open the git clone project folder ***[Go SDK Amazon Sample Project](https://gitlab.aws.dev/go_sdk_blog/go_sdk_amazon_q)*** < **Replace with Public Link**> from the previous steps in your IDE.
 2. Click the Amazon Q Developer icon in your IDE to show the Amazon Q chat panel "<img align="center" width="25" height="25" src="./images/amazon_q.png">"
