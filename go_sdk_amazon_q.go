@@ -39,7 +39,7 @@ func NewGoSdkWithAmazonQDemoStack(scope constructs.Construct, id string, props *
 	if err != nil {
 		log.Println(err)
 	}
-	lambdaPath := filepath.Join(path, "myFunction.zip")
+	lambdaPath := filepath.Join(path, "main.zip")
 
 	// Create the Lambda function
 	lambdaFunction := awslambda.NewFunction(stack, jsii.String("MyLambdaFunction"), &awslambda.FunctionProps{
@@ -84,6 +84,7 @@ func NewGoSdkWithAmazonQDemoStack(scope constructs.Construct, id string, props *
 	bucket := awss3.NewBucket(stack, jsii.String("amazonqgosdk"), &awss3.BucketProps{
 		//BucketName:    jsii.String(bucketName), // Convert bucketName to *string
 		RemovalPolicy: awscdk.RemovalPolicy_DESTROY,
+		AutoDeleteObjects: jsii.Bool(true),
 	})
 	
      // Specify asset options

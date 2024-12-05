@@ -30,7 +30,7 @@ func NewDynamoDBStack(scope constructs.Construct, id string, props *DynamoDBStac
 	if err != nil {
 		log.Println(err)
 	}
-	lambdaPath := filepath.Join(path, "hitsLambda.zip")
+	lambdaPath := filepath.Join(path, "updatePlayer.zip")
 
 	// Create a new DynamoDB table
 	table := awsdynamodb.NewTable(stack, jsii.String("PlayerHits"), &awsdynamodb.TableProps{
@@ -41,7 +41,7 @@ func NewDynamoDBStack(scope constructs.Construct, id string, props *DynamoDBStac
 		RemovalPolicy: awscdk.RemovalPolicy_DESTROY,
 	})
 
-	getHitsLambdaPath := filepath.Join(path, "getHits.zip")
+	getHitsLambdaPath := filepath.Join(path, "hitCounter.zip")
 	getHitsLambda := awslambda.NewFunction(stack, jsii.String("GetHitsFunction"), &awslambda.FunctionProps{
 		Code:         awslambda.AssetCode_FromAsset(&getHitsLambdaPath, nil),
 		Handler:      jsii.String("main"),
