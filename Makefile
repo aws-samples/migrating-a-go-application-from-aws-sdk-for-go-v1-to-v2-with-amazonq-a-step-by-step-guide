@@ -1,4 +1,11 @@
-# Makefile for multiple Lambda functions
+# Makefile for multiple Lambda functions (Windows and Mac compatible)
+
+# Detect OS
+ifeq ($(OS),Windows_NT)
+    DETECTED_OS := Windows
+else
+    DETECTED_OS := $(shell uname -s)
+endif
 
 # Variables
 GOOS := linux
@@ -13,16 +20,28 @@ LAMBDAS := main hitCounter updatePlayer
 all: $(LAMBDAS)
 
 # Pattern rule for building and zipping Lambda functions
-$(LAMBDAS): 
+$(LAMBDAS):
+ifeq ($(DETECTED_OS),Windows)
+	@echo Building $(LAMBDA_DIR)\$@.go into $@.zip
+	cd $(LAMBDA_DIR) && set GOOS=$(GOOS)& set GOARCH=$(GOARCH)& go build -o ..\$(BINARY_NAME) $@.go
+	powershell Compress-Archive -Path $(BINARY_NAME) -DestinationPath $@.zip -Force
+	del $(BINARY_NAME)
+else
 	@echo "Building $(LAMBDA_DIR)/$@.go into $@.zip"
 	cd $(LAMBDA_DIR) && GOOS=$(GOOS) GOARCH=$(GOARCH) go build -o ../$(BINARY_NAME) $@.go
 	zip $@.zip $(BINARY_NAME)
 	rm $(BINARY_NAME)
+endif
 
 # Clean up
 clean:
+ifeq ($(DETECTED_OS),Windows)
+	if exist $(BINARY_NAME) del $(BINARY_NAME)
+	if exist *.zip del *.zip
+else
 	rm -f $(BINARY_NAME)
 	rm -f *.zip
+endif
 
 # Get dependencies (if needed)
 get-deps:
